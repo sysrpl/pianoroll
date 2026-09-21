@@ -21,6 +21,8 @@
     <AvaloniaResource Include="resources\**" />
     <!-- The app icon, shown in the window, the taskbar and Help > About. -->
     <AvaloniaResource Include="images\icon.png" />
+    <!-- The picture F1 puts behind the notes, for recording. -->
+    <AvaloniaResource Include="images\wallpaper.jpg" />
   </ItemGroup>
 
   <ItemGroup>

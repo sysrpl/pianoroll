@@ -7,7 +7,7 @@ piano, saxophone, bass or electric guitar, or with sounds the program synthesise
 Built with .NET 8 and [Avalonia](https://avaloniaui.net/) for the interface, and
 [SDL2](https://www.libsdl.org/) for audio output, so it runs on Linux, Windows and macOS.
 
-![Piano Roll: cyan and green bars falling towards a full-sized keyboard, throwing sparks off the keys as they land](images/screenshot.png)
+https://github.com/user-attachments/assets/d870b253-1e9a-4240-be3c-930fc12c7ef1
 
 ## Features
 
@@ -39,6 +39,10 @@ Built with .NET 8 and [Avalonia](https://avaloniaui.net/) for the interface, and
   the wheel over it to rewind and fast-forward five seconds at a time. Marks every 30 seconds
   give a sense of scale.
 - **Full screen** from the toolbar or F11; Escape comes back.
+- **A backdrop for recording**: F1 puts `images/wallpaper.jpg` up on a window of its own, filling
+  the screen *behind* the player, so the player can be captured against a clean background
+  instead of the desktop. F1 again takes it down. Replace the JPEG and rebuild to use another
+  picture.
 - **Velocity and sustain**: a note's recorded attack velocity sets how loud *and* how bright it
   sounds — softly struck notes are dulled as well as quietened, rather than just turned down —
   and the sustain pedal (controller 64) is followed, so released keys keep ringing while it's

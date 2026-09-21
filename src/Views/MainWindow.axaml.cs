@@ -118,6 +118,29 @@ public partial class MainWindow : Window
 
     private void Exit_Click(object? sender, RoutedEventArgs e) => Close();
 
+    /// <summary>The backdrop window behind the player, while F1 has it up.</summary>
+    private WallpaperWindow? _wallpaper;
+
+    /// <summary>
+    /// F1: puts images/wallpaper.jpg up on its own window filling the screen behind the player,
+    /// so the player can be recorded against a clean background. F1 again takes it down.
+    /// </summary>
+    private void ToggleWallpaper()
+    {
+        if (_wallpaper is not null)
+        {
+            _wallpaper.Close();
+            return;
+        }
+
+        _wallpaper = new WallpaperWindow(this);
+        _wallpaper.Closed += (_, _) => _wallpaper = null;
+        _wallpaper.Show();
+
+        // Showing it can raise it over the player on some window managers; put the player back.
+        Activate();
+    }
+
     /// <summary>The window state to go back to when full screen is turned off.</summary>
     private WindowState _beforeFullScreen = WindowState.Normal;
 
@@ -159,11 +182,17 @@ public partial class MainWindow : Window
             e.Handled = true;
             ToggleFullScreen();
         }
+        else if (e.Key == Key.F1)
+        {
+            e.Handled = true;
+            ToggleWallpaper();
+        }
         base.OnKeyDown(e);
     }
 
     protected override void OnClosing(WindowClosingEventArgs e)
     {
+        _wallpaper?.Close();
         _frames.Stop();
         _player.Unload();
         _engine.AllNotesOff();
