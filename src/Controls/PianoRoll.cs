@@ -1,5 +1,6 @@
 using Avalonia;
 using Avalonia.Controls;
+using Avalonia.Input;
 using Avalonia.Media;
 using pianoroll.Models;
 
@@ -57,6 +58,12 @@ public class PianoRoll : Control
     private const double KeyboardSpan = 2.2;
 
     private static readonly IBrush HitLine = new SolidColorBrush(Colors.White, 0.35);
+    private static readonly IBrush SplitLine = new SolidColorBrush(Color.FromRgb(0xE0, 0x44, 0x3E));
+
+    /// <summary>How close the pointer must be to the split line to pick it up, in pixels.</summary>
+    private const double SplitGrab = 8;
+
+    private static readonly Cursor SplitCursor = new(StandardCursorType.SizeWestEast);
     private static readonly IBrush OctaveLine = new SolidColorBrush(Colors.White, 0.04);
 
     /// <summary>Semitones from C that are black keys.</summary>
@@ -72,6 +79,38 @@ public class PianoRoll : Control
 
     /// <summary>Seconds of animation so far, which turns the palette when nothing is playing.</summary>
     private double _elapsed;
+
+    private bool _splitEnabled;
+    private int _splitNote = 60;
+    private bool _draggingSplit;
+
+    /// <summary>Raised as the split line is dragged, with the first note of the new right half.</summary>
+    public event Action<int>? SplitMoved;
+
+    /// <summary>Whether the keyboard split's red line is shown, and can be dragged.</summary>
+    public bool SplitEnabled
+    {
+        get => _splitEnabled;
+        set
+        {
+            _splitEnabled = value;
+            InvalidateVisual();
+        }
+    }
+
+    /// <summary>
+    /// Where the split falls: the first note of the right half. The line is drawn in the gap
+    /// between this note and the one below it, never on a note.
+    /// </summary>
+    public int SplitNote
+    {
+        get => _splitNote;
+        set
+        {
+            _splitNote = value;
+            InvalidateVisual();
+        }
+    }
 
     /// <summary>The keyboard the bars fall onto. Set once, in the window.</summary>
     public PianoKeyboard? Keyboard { get; set; }
@@ -168,6 +207,112 @@ public class PianoRoll : Control
         DrawFallingNotes(context, height);
         DrawHitLine(context, width, height);
         DrawParticles(context);
+        DrawSplit(context, height);
+    }
+
+    /// <summary>The keyboard split: a red line down the roll, with a handle at the top to grab.</summary>
+    private void DrawSplit(DrawingContext context, double height)
+    {
+        if (!_splitEnabled || SplitX(_splitNote) is not { } x)
+            return;
+
+        context.FillRectangle(SplitLine, new Rect(x - 1, 0, 2, height));
+        context.DrawRectangle(SplitLine, null, new RoundedRect(new Rect(x - 5, 0, 10, 26), 3));
+    }
+
+    /// <summary>
+    /// Where the line for a split at <paramref name="note"/> goes: midway between that note's
+    /// column and the column of the note below it. Null before the keyboard is laid out.
+    /// </summary>
+    private double? SplitX(int note)
+    {
+        if (Keyboard is null)
+            return null;
+
+        var hasBelow = Keyboard.TryGetKeyBounds(note - 1, out var below);
+        var hasAbove = Keyboard.TryGetKeyBounds(note, out var above);
+        var half = Keyboard.NoteWidth / 2;
+
+        return (hasBelow, hasAbove) switch
+        {
+            (true, true) => (below.Center.X + above.Center.X) / 2,
+            (true, false) => below.Center.X + half,
+            (false, true) => above.Center.X - half,
+            _ => null,
+        };
+    }
+
+    /// <summary>The split whose line is closest to <paramref name="x"/>.</summary>
+    private int NearestSplit(double x)
+    {
+        if (Keyboard is null)
+            return _splitNote;
+
+        var best = _splitNote;
+        var bestDistance = double.MaxValue;
+        for (var note = Keyboard.FirstNote + 1; note <= Keyboard.LastNote; note++)
+        {
+            if (SplitX(note) is not { } lineX)
+                continue;
+
+            var distance = Math.Abs(lineX - x);
+            if (distance < bestDistance)
+            {
+                best = note;
+                bestDistance = distance;
+            }
+        }
+        return best;
+    }
+
+    private bool NearSplit(Point point) =>
+        _splitEnabled && SplitX(_splitNote) is { } x && Math.Abs(point.X - x) <= SplitGrab;
+
+    protected override void OnPointerPressed(PointerPressedEventArgs e)
+    {
+        base.OnPointerPressed(e);
+        if (!e.GetCurrentPoint(this).Properties.IsLeftButtonPressed || !NearSplit(e.GetPosition(this)))
+            return;
+
+        _draggingSplit = true;
+        e.Pointer.Capture(this);
+        e.Handled = true;
+    }
+
+    /// <summary>Dragging moves the split to the nearest gap between notes; hovering shows it can be grabbed.</summary>
+    protected override void OnPointerMoved(PointerEventArgs e)
+    {
+        base.OnPointerMoved(e);
+        var point = e.GetPosition(this);
+
+        if (_draggingSplit)
+        {
+            var note = NearestSplit(point.X);
+            if (note != _splitNote)
+            {
+                SplitNote = note;
+                SplitMoved?.Invoke(note);
+            }
+            return;
+        }
+
+        Cursor = NearSplit(point) ? SplitCursor : Cursor.Default;
+    }
+
+    protected override void OnPointerReleased(PointerReleasedEventArgs e)
+    {
+        base.OnPointerReleased(e);
+        if (!_draggingSplit)
+            return;
+
+        _draggingSplit = false;
+        e.Pointer.Capture(null);
+    }
+
+    protected override void OnPointerCaptureLost(PointerCaptureLostEventArgs e)
+    {
+        base.OnPointerCaptureLost(e);
+        _draggingSplit = false;
     }
 
     private void DrawFallingNotes(DrawingContext context, double height)

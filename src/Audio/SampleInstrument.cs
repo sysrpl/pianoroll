@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 namespace pianoroll.Audio;
 
 /// <summary>
@@ -17,8 +18,21 @@ namespace pianoroll.Audio;
 /// </summary>
 public sealed class SampleInstrument
 {
-    /// <summary>How many recorded notes can ring at once, counting ones fading out.</summary>
-    private const int Polyphony = 48;
+    /// <summary>
+    /// Voices in the pool. More than <see cref="StealAbove"/>, so that when a busy passage needs
+    /// a voice back, the old note can fade out on its own voice while the new one starts on a
+    /// spare — a note is never cut off mid-waveform, which is what makes a click.
+    /// </summary>
+    private const int Polyphony = 64;
+
+    /// <summary>How many notes may sound at once before the quietest is faded out to make room.</summary>
+    private const int StealAbove = 48;
+
+    /// <summary>How quickly a note being made room for fades away: fast, but not instant.</summary>
+    private const float StealFade = 0.005f;
+
+    /// <summary>How quickly everything fades when all notes are stopped at once.</summary>
+    private const float StopFade = 0.01f;
 
     /// <summary>Semitones from A, in the order the file names count octaves.</summary>
     private static readonly (string Name, int Semitone)[] NoteNames =
@@ -40,13 +54,21 @@ public sealed class SampleInstrument
     /// <summary>The dullest a softly played note gets, in Hz.</summary>
     private readonly float _softest;
 
+    /// <summary>
+    /// How many decibels louder the lowest notes are played. The lift is full at B1 and below
+    /// and shrinks evenly to nothing at middle C, so it only touches the bottom register. It is
+    /// a plain change of level: nothing is added to the sound.
+    /// </summary>
+    private readonly float _lowBoost;
+
     private bool _sustain;
 
-    private SampleInstrument(int sampleRate, float release, float softest)
+    private SampleInstrument(int sampleRate, float release, float softest, float lowBoost)
     {
         _sampleRate = sampleRate;
         _release = release;
         _softest = softest;
+        _lowBoost = lowBoost;
         for (var i = 0; i < _voices.Length; i++)
             _voices[i] = new SampleVoice();
     }
@@ -65,13 +87,16 @@ public sealed class SampleInstrument
     /// True for an instrument that is blown or bowed rather than struck: it stops sooner when the
     /// key is let go, and stays brighter when played softly.
     /// </param>
+    /// <param name="lowBoost">Decibels of extra level for the lowest notes (see <see cref="_lowBoost"/>).</param>
     /// <exception cref="InvalidDataException">The folder holds no usable notes.</exception>
-    public static SampleInstrument Load(string folder, int sampleRate, bool sustained = false)
+    public static SampleInstrument Load(string folder, int sampleRate, bool sustained = false,
+        float lowBoost = 0)
     {
         var instrument = new SampleInstrument(
             sampleRate,
             release: sustained ? 0.12f : 0.4f,
-            softest: sustained ? 2600f : 900f) { Folder = folder };
+            softest: sustained ? 2600f : 900f,
+            lowBoost) { Folder = folder };
 
         foreach (var path in Directory.EnumerateFiles(folder, "*.wav"))
         {
@@ -122,6 +147,21 @@ public sealed class SampleInstrument
         return null;
     }
 
+    /// <summary>How many voices are sounding now, including ones fading out.</summary>
+    public int ActiveVoices
+    {
+        get
+        {
+            var count = 0;
+            foreach (var voice in _voices)
+            {
+                if (voice.Active)
+                    count++;
+            }
+            return count;
+        }
+    }
+
     /// <summary>The sustain pedal. Holding it keeps released notes ringing, as the dampers stay up.</summary>
     public void SetSustain(bool down)
     {
@@ -137,7 +177,8 @@ public sealed class SampleInstrument
         }
     }
 
-    public void NoteOn(int note, int velocity)
+    /// <param name="gain">An extra level for this note, from the keyboard split's gain controls.</param>
+    public void NoteOn(int note, int velocity, float gain = 1f)
     {
         var (sample, sampleNote) = Nearest(note);
         if (sample is null)
@@ -150,14 +191,31 @@ public sealed class SampleInstrument
                 voice.StartRelease(_sampleRate, seconds: 0.08f);
         }
 
+        // A busy passage (the pedal holding a lot of notes, say): fade the quietest one out to
+        // make room, rather than cutting it off when its voice is needed.
+        var sounding = 0;
+        foreach (var voice in _voices)
+        {
+            if (voice.Active && !voice.Releasing)
+                sounding++;
+        }
+        if (sounding >= StealAbove)
+            QuietestSounding()?.StartRelease(_sampleRate, StealFade);
+
+        // There is almost always a spare voice. Only if every one is busy is the quietest of all
+        // taken over; by then it is one already fading to nothing.
         var free = Array.Find(_voices, v => !v.Active) ?? Quietest();
         var force = Math.Clamp(velocity, 1, 127) / 127f;
+
+        // The low-register lift: full at B1 (MIDI 35) and below, none from middle C (60) up.
+        var lowness = Math.Clamp((60 - note) / 25f, 0f, 1f);
+        var lift = MathF.Pow(10f, _lowBoost * lowness / 20f);
 
         free.Start(
             note,
             sample,
             step: sample.RateRatio * Math.Pow(2, (note - sampleNote) / 12.0),
-            gain: MathF.Pow(force, 1.4f),
+            gain: MathF.Pow(force, 1.4f) * lift * gain,
             // Soft notes are duller as well as quieter, opening up as they are played harder.
             cutoff: Cutoff(_softest + 13000f * force * force));
     }
@@ -176,18 +234,23 @@ public sealed class SampleInstrument
         }
     }
 
+    /// <summary>Fades every note out quickly: stopped, but without the click of cutting them off.</summary>
     public void AllNotesOff()
     {
         foreach (var voice in _voices)
-            voice.Stop();
+        {
+            if (voice.Active)
+                voice.StartRelease(_sampleRate, StopFade);
+        }
     }
 
-    /// <summary>Mixes every ringing note into the two channels.</summary>
+    /// <summary>
+    /// Adds every ringing note into the two channels. It adds rather than overwrites, so two
+    /// instruments (the halves of a keyboard split) can be mixed into the same buffers.
+    /// </summary>
+    [MethodImpl(MethodImplOptions.AggressiveOptimization)]
     public void Render(Span<float> left, Span<float> right)
     {
-        left.Clear();
-        right.Clear();
-
         foreach (var voice in _voices)
         {
             if (voice.Active)
@@ -212,6 +275,18 @@ public sealed class SampleInstrument
     }
 
     /// <summary>When every voice is busy, the quietest one gives way.</summary>
+    /// <summary>The quietest note still sounding (not already fading out), or null.</summary>
+    private SampleVoice? QuietestSounding()
+    {
+        SampleVoice? quietest = null;
+        foreach (var voice in _voices)
+        {
+            if (voice.Active && !voice.Releasing && (quietest is null || voice.Level < quietest.Level))
+                quietest = voice;
+        }
+        return quietest;
+    }
+
     private SampleVoice Quietest()
     {
         var quietest = _voices[0];
@@ -236,6 +311,15 @@ public sealed class SampleInstrument
     private sealed class SampleVoice
     {
         private const float Scale = 1f / 32768f;
+
+        /// <summary>Output samples over which a note fades in: about 2ms, too short to hear as a fade.</summary>
+        private const int FadeIn = 96;
+
+        /// <summary>Output samples over which a note fades out before its recording runs out: about 6ms.</summary>
+        private const int FadeOut = 256;
+
+        /// <summary>Output samples since the note started, for the fade-in.</summary>
+        private int _age;
 
         private Sample? _sample;
         private double _position;
@@ -267,6 +351,7 @@ public sealed class SampleInstrument
             _cutoff = cutoff;
             _leftFilter = 0f;
             _rightFilter = 0f;
+            _age = 0;
             Level = gain;
             Releasing = false;
             Sustained = false;
@@ -287,6 +372,7 @@ public sealed class SampleInstrument
             _sample = null;
         }
 
+        [MethodImpl(MethodImplOptions.AggressiveOptimization)]
         public void Render(Span<float> left, Span<float> right)
         {
             if (_sample is not { } sample)
@@ -328,8 +414,22 @@ public sealed class SampleInstrument
                 _leftFilter += _cutoff * (l - _leftFilter);
                 _rightFilter += _cutoff * (r - _rightFilter);
 
-                left[i] += _leftFilter * Level;
-                right[i] += _rightFilter * Level;
+                // Guards against clicks: a note never jumps in at full level, and never stops dead
+                // because its recording ran out while it was still sounding.
+                var fade = 1f;
+                if (_age < FadeIn)
+                    fade = _age / (float)FadeIn;
+                _age++;
+
+                if (!sample.HasLoop || Releasing)
+                {
+                    var remaining = (sample.Frames - 1 - _position) / _step;
+                    if (remaining < FadeOut)
+                        fade *= (float)Math.Max(0, remaining) / FadeOut;
+                }
+
+                left[i] += _leftFilter * Level * fade;
+                right[i] += _rightFilter * Level * fade;
 
                 _position += _step;
             }

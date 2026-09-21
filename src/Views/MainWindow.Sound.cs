@@ -80,7 +80,7 @@ public partial class MainWindow
 
             ShowSoundSource($"Loading the {instrument.Name.ToLowerInvariant()}...");
             var samples = await Task.Run(() =>
-                SampleInstrument.Load(folder, AudioDevice.SampleRate, instrument.Sustained));
+                SampleInstrument.Load(folder, AudioDevice.SampleRate, instrument.Sustained, instrument.LowBoost));
 
             _engine.UseSamples(instrument.Kind, samples);
             ShowSoundSource($"{instrument.Name}: {samples.Count} recorded notes.");
@@ -114,20 +114,10 @@ public partial class MainWindow
         _settingsService.Save(settings);
     }
 
-    /// <summary>
-    /// Says where the sounds are coming from — on the status line while nothing is open, and
-    /// always in the instrument button's tooltip, which is where it's wanted later on.
-    /// </summary>
+    /// <summary>Says where the sounds are coming from, in the instrument button's tooltip.</summary>
     private void ShowSoundSource(string message, bool isError = false)
     {
         Tip.Set(InstrumentButton, "Instrument",
-            $"Choose what the keys sound like: piano, organ, electric guitar or banjo. {message}");
-
-        if (_player.Song is not null)
-            return;
-
-        StatusText.Text = message;
-        StatusText.Classes.Set("error", isError);
-        StatusText.Classes.Set("dim", !isError);
+            $"Choose what the keys sound like. {(isError ? "Problem: " : "")}{message}");
     }
 }

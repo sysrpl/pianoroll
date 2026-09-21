@@ -3,9 +3,6 @@ namespace pianoroll.Services;
 /// <summary>Finding a SoundFont to play with, without asking the user on every platform.</summary>
 public static class SoundFonts
 {
-    /// <summary>The file patterns the Open dialog offers.</summary>
-    public static IReadOnlyList<string> Patterns { get; } = ["*.sf2", "*.sf3"];
-
     /// <summary>
     /// The first SoundFont found in the usual places, or null. Linux distributions install
     /// FluidR3 or TimGM under /usr/share/sounds/sf2; on macOS and Windows there is no standard

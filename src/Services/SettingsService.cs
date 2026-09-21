@@ -14,6 +14,22 @@ public sealed class AppSettings
     /// <summary>How loud the keyboard is, 0 to 1.</summary>
     public double Volume { get; set; } = 0.6;
 
+    /// <summary>Whether the keyboard is split between two instruments.</summary>
+    public bool SplitEnabled { get; set; }
+
+    /// <summary>Whether the split's toolbar row and red line are shown while it is on.</summary>
+    public bool SplitControlsVisible { get; set; } = true;
+
+    /// <summary>The first note of the right half; everything below it plays the left instrument.</summary>
+    public int SplitNote { get; set; } = 60;
+
+    /// <summary>The left half's instrument, by <c>InstrumentKind</c> name. The right half is <see cref="Instrument"/>.</summary>
+    public string LeftInstrument { get; set; } = "RealBass";
+
+    /// <summary>Each half's gain in decibels, while the keyboard is split.</summary>
+    public double LeftGain { get; set; }
+    public double RightGain { get; set; }
+
     /// <summary>The folder the last MIDI file was opened from, so the picker starts there again.</summary>
     public string LastMidiFolder { get; set; } = "";
 

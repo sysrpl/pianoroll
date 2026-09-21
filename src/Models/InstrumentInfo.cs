@@ -25,8 +25,10 @@ public enum InstrumentKind
 /// <summary>
 /// An instrument as the Instrument dialog lists it. <paramref name="Program"/> is its General
 /// MIDI number, used to pick the right instrument out of a SoundFont. <paramref name="SampleFolder"/>
-/// names its folder under samples/ when it is played from recordings, and
-/// <paramref name="Sustained"/> marks the ones that are blown or bowed rather than struck.
+/// names its folder under samples/ when it is played from recordings,
+/// <paramref name="Sustained"/> marks the ones that are blown or bowed rather than struck, and
+/// <paramref name="LowBoost"/> is how many decibels louder its lowest notes are played, fading
+/// to nothing by middle C.
 /// </summary>
 public sealed record InstrumentInfo(
     InstrumentKind Kind,
@@ -34,7 +36,8 @@ public sealed record InstrumentInfo(
     string Description,
     int Program,
     string? SampleFolder = null,
-    bool Sustained = false)
+    bool Sustained = false,
+    float LowBoost = 0)
 {
     /// <summary>Every instrument, in the order the dialog shows them.</summary>
     public static IReadOnlyList<InstrumentInfo> All { get; } =
@@ -49,9 +52,10 @@ public sealed record InstrumentInfo(
             SampleFolder: "saxaphone",
             Sustained: true),
         new(InstrumentKind.RealBass, "Real bass",
-            "A recorded bass guitar, sampled every minor third and resampled for the notes in between.",
+            "Karoryfer's Big Little Bass: a bass played high on the neck, recorded on every note from B1 up.",
             Program: 33,        // Electric Bass (finger), for the SoundFont fallback
-            SampleFolder: "bass"),
+            SampleFolder: "bass",
+            LowBoost: 6),       // its bottom notes are hard to hear otherwise
         new(InstrumentKind.BlackGuitar, "Real black guitar",
             "A recorded electric guitar, chromatically sampled across the whole fretboard.",
             Program: 27,        // Electric Guitar (clean), for the SoundFont fallback

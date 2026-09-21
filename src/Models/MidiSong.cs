@@ -30,6 +30,26 @@ public sealed class MidiSong
     public string Path { get; }
     public string Name { get; }
 
+    /// <summary>
+    /// The name tidied for the window title: underscores and hyphens become spaces, a stray
+    /// "mid" or "midi" left over from the file name is dropped, and each word is capitalised —
+    /// "rocket_man-mid" becomes "Rocket Man".
+    /// </summary>
+    public string Title
+    {
+        get
+        {
+            var words = Name.Replace('_', ' ').Replace('-', ' ')
+                .Split(' ', StringSplitOptions.RemoveEmptyEntries)
+                .Where(w => !w.Equals("mid", StringComparison.OrdinalIgnoreCase)
+                         && !w.Equals("midi", StringComparison.OrdinalIgnoreCase))
+                .Select(w => char.ToUpper(w[0]) + w[1..].ToLower());
+
+            var title = string.Join(' ', words);
+            return title.Length > 0 ? title : Name;
+        }
+    }
+
     /// <summary>Every note in the file, ordered by when it starts.</summary>
     public IReadOnlyList<MidiNote> Notes { get; }
 

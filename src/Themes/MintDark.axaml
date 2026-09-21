@@ -161,7 +161,7 @@
         <Setter Property="FontFamily" Value="{DynamicResource ContentControlThemeFontFamily}" />
         <Setter Property="FontSize" Value="{DynamicResource ControlContentThemeFontSize}" />
         <!-- The app icon, shown in the taskbar and title bars. -->
-        <Setter Property="Icon" Value="/resources/icon.png" />
+        <Setter Property="Icon" Value="/images/icon.png" />
     </Style>
 
     <!-- Buttons: 25px tall and at least 75px wide. Toolbar and icon buttons override this in their views. -->

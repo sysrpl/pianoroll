@@ -4,6 +4,7 @@ namespace pianoroll.Helpers;
 public static class Icons
 {
     public const string AlertCircleOutline = "\U000F05D6";
+    public const string ArrowSplitVertical = "\U000F093C";
     public const string CheckCircleOutline = "\U000F05E1";
     public const string FolderOpen = "\U000F0770";
     public const string Fullscreen = "\U000F0293";
@@ -13,5 +14,6 @@ public static class Icons
     public const string Piano = "\U000F067D";
     public const string Play = "\U000F040A";
     public const string Stop = "\U000F04DB";
+    public const string TuneVertical = "\U000F066A";
     public const string VolumeHigh = "\U000F057E";
 }

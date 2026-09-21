@@ -69,6 +69,8 @@ public sealed class SongPlayer
         if (Position >= Duration)
             Seek(0);
 
+        // Pausing let the pedal up, so it goes back to wherever the music has it here.
+        SustainChanged?.Invoke(PedalAt(_base));
         _clock.Restart();
     }
 
@@ -81,6 +83,10 @@ public sealed class SongPlayer
         _base = Position;
         _clock.Reset();
         ReleaseAll();
+
+        // Let the pedal up too, or every note it's holding keeps ringing while paused — for ever,
+        // for an organ or a looped recording.
+        SustainChanged?.Invoke(false);
     }
 
     /// <summary>Pauses and rewinds to the start.</summary>
@@ -107,18 +113,26 @@ public sealed class SongPlayer
         _next = Song?.IndexAt(_base) ?? 0;
         ReleaseAll();
 
-        // The pedal is wherever the file last left it before this point.
-        _nextSustain = 0;
-        var down = false;
-        if (Song is not null)
-        {
-            while (_nextSustain < Song.Sustain.Count && Song.Sustain[_nextSustain].Time <= _base)
-                down = Song.Sustain[_nextSustain++].Down;
-        }
-        SustainChanged?.Invoke(down);
+        SustainChanged?.Invoke(PedalAt(_base));
 
         if (wasPlaying)
             _clock.Restart();
+    }
+
+    /// <summary>
+    /// Whether the pedal is down at <paramref name="seconds"/>: wherever the file last left it
+    /// before that point. Also moves the pedal index there, so playing on from it is in step.
+    /// </summary>
+    private bool PedalAt(double seconds)
+    {
+        _nextSustain = 0;
+        var down = false;
+        if (Song is null)
+            return false;
+
+        while (_nextSustain < Song.Sustain.Count && Song.Sustain[_nextSustain].Time <= seconds)
+            down = Song.Sustain[_nextSustain++].Down;
+        return down;
     }
 
     /// <summary>Called once a frame: start the notes that are due and end the ones that are over.</summary>

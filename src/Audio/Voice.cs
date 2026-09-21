@@ -1,3 +1,4 @@
+using System.Runtime.CompilerServices;
 using pianoroll.Models;
 
 namespace pianoroll.Audio;
@@ -29,6 +30,19 @@ public sealed class Voice
     private readonly float[] _partialDecay = new float[MaxPartials];
     private readonly float[] _beatPhase = new float[MaxPartials];
     private readonly float[] _beatStep = new float[MaxPartials];
+
+    /// <summary>
+    /// Each partial's current wobble, as a gain. The wobble is a few hertz at most, so it is
+    /// worked out every <see cref="ControlPeriod"/> samples rather than every sample: the same
+    /// sound for half the sine lookups.
+    /// </summary>
+    private readonly float[] _beatGain = new float[MaxPartials];
+
+    /// <summary>Samples between wobble updates: about 0.7ms, far finer than a wobble can be heard.</summary>
+    private const int ControlPeriod = 32;
+
+    /// <summary>Samples until the wobble is next worked out.</summary>
+    private int _control;
     private int _partials;
 
     // The hammer: a noise burst, low-passed, gone within about 20ms.
@@ -76,17 +90,25 @@ public sealed class Voice
     /// <summary>True once the voice has faded to nothing and its slot can be reused.</summary>
     public bool IsFinished => Note < 0;
 
+    /// <summary>True once the key is up and the note is dying away.</summary>
+    public bool IsReleasing => _releasing;
+
+    /// <summary>How loud the voice is now, for choosing which to take over when all are busy.</summary>
+    public float Loudness => Note < 0 ? 0f : _level;
+
     /// <summary>
     /// Starts <paramref name="note"/> on this voice, replacing whatever it held.
     /// <paramref name="velocity"/> is MIDI's 1-127: it sets how loud and how bright the note is,
     /// because a string struck or plucked harder gives out far more high harmonics, and that
     /// change in tone is most of what "played harder" sounds like.
     /// </summary>
-    public void Start(int note, InstrumentKind instrument, Random random, int velocity = 100)
+    /// <param name="gain">An extra level for this note, from the keyboard split's gain controls.</param>
+    public void Start(int note, InstrumentKind instrument, Random random, int velocity = 100, float gain = 1f)
     {
         Note = note;
         _releasing = false;
         _level = 0f;
+        _control = 0;
         _random = random;
         _hammerLevel = 0f;
 
@@ -135,6 +157,8 @@ public sealed class Voice
                 _releaseStep = Step(seconds: 0.05f);
                 break;
         }
+
+        _amplitude *= gain;
     }
 
     /// <summary>The key was let go: fade the note out over the instrument's release time.</summary>
@@ -144,6 +168,7 @@ public sealed class Voice
     public void Silence() => Note = -1;
 
     /// <summary>Adds this voice's next <paramref name="count"/> samples into <paramref name="buffer"/>.</summary>
+    [MethodImpl(MethodImplOptions.AggressiveOptimization)]
     public void Render(float[] buffer, int count)
     {
         if (Note < 0)
@@ -246,21 +271,39 @@ public sealed class Voice
         _amplitude = 0.6f * (0.5f + 0.5f * force);
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveOptimization)]
     private float NextAdditive()
     {
+        if (--_control <= 0)
+        {
+            // ±8% wobble: the beating between a note's strings, moved on by a whole control period.
+            _control = ControlPeriod;
+            for (var p = 0; p < _partials; p++)
+            {
+                if (_beatStep[p] <= 0f)
+                {
+                    _beatGain[p] = 1f;
+                    continue;
+                }
+
+                _beatPhase[p] += _beatStep[p] * ControlPeriod;
+                if (_beatPhase[p] > 1f)
+                    _beatPhase[p] -= 1f;
+                _beatGain[p] = 1f + 0.08f * SineTable.Sin(_beatPhase[p]);
+            }
+        }
+
         var sample = 0f;
         for (var p = 0; p < _partials; p++)
         {
             var level = _partialLevel[p];
 
-            if (_beatStep[p] > 0f)
-            {
-                // ±8% wobble: the beating between a note's strings.
-                _beatPhase[p] += _beatStep[p];
-                level *= 1f + 0.08f * SineTable.Sin(_beatPhase[p]);
-            }
+            // Upper partials die away within a second while the fundamental rings on for many;
+            // once one is 80dB down it can't be heard, so it costs nothing from then on.
+            if (level < 0.0001f)
+                continue;
 
-            sample += SineTable.Sin(_partialPhase[p]) * level;
+            sample += SineTable.Sin(_partialPhase[p]) * level * _beatGain[p];
             _partialLevel[p] *= _partialDecay[p];
 
             _partialPhase[p] += _partialStep[p];
@@ -337,6 +380,7 @@ public sealed class Voice
         _amplitude = 0.55f * (0.35f + 0.65f * force);
     }
 
+    [MethodImpl(MethodImplOptions.AggressiveOptimization)]
     private float NextString()
     {
         var next = _readIndex + 1 < _stringLength ? _readIndex + 1 : 0;

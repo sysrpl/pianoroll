@@ -146,7 +146,7 @@ public partial class MainWindow
         settings.LastMidiFolder = Path.GetDirectoryName(path) ?? "";
         _settingsService.Save(settings);
 
-        StatusText.Text = $"{song.Name} — {song.Notes.Count:N0} notes, {Clock(song.Duration)}";
+        Title = $"Piano Roll: {song.Title}";
         PlaceholderText.IsVisible = false;
         ShowPosition();
         UpdateTransport();
@@ -164,14 +164,26 @@ public partial class MainWindow
     private void Pause_Click(object? sender, RoutedEventArgs e)
     {
         _player.Pause();
+        SilenceAfterStop();
         UpdateTransport();
     }
 
     private void Stop_Click(object? sender, RoutedEventArgs e)
     {
         _player.Stop();
+        SilenceAfterStop();
         ShowPosition();
         UpdateTransport();
+    }
+
+    /// <summary>
+    /// Pause and Stop end every note the player started, and let the pedal up; this fades out
+    /// anything still sounding as well, so no note can survive them, whatever held it on.
+    /// </summary>
+    private void SilenceAfterStop()
+    {
+        _engine.AllNotesOff();
+        Keyboard.ReleaseAll();
     }
 
     /// <summary>Greys out what can't be done: transport needs a song, play and pause swap over.</summary>

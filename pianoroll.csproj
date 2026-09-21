@@ -9,6 +9,9 @@
     <ApplicationManifest>app.manifest</ApplicationManifest>
     <AvaloniaUseCompiledBindingsByDefault>true</AvaloniaUseCompiledBindingsByDefault>
     <Product>Piano Roll</Product>
+    <!-- Optimise even Debug builds. Audio has a hard deadline: every 23ms block must be ready in
+         time or it plays as a gap (a pop), and unoptimised DSP loops miss it. -->
+    <Optimize>true</Optimize>
     <Version>0.1.0</Version>
   </PropertyGroup>
 

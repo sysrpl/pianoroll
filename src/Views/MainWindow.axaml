@@ -9,7 +9,26 @@
         MinWidth="720" MinHeight="460"
         WindowStartupLocation="CenterScreen">
 
+    <Window.Resources>
+        <!-- A smaller, round slider thumb, and a slider no taller than the toolbar's buttons.
+             Avalonia's Fluent Slider reads all four of these with DynamicResource. -->
+        <x:Double x:Key="SliderHorizontalThumbWidth">12</x:Double>
+        <x:Double x:Key="SliderHorizontalThumbHeight">12</x:Double>
+        <CornerRadius x:Key="SliderThumbCornerRadius">6</CornerRadius>
+        <x:Double x:Key="SliderHorizontalHeight">24</x:Double>
+    </Window.Resources>
+
     <Window.Styles>
+        <!-- The toolbar: every control on one centre line, and every button the same 24px
+             height, so nothing sits a pixel off its neighbours. -->
+        <Style Selector=":is(Panel).toolbar > :is(Control)">
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
+        <Style Selector=":is(Panel).toolbar > Button, :is(Panel).toolbar > ToggleButton">
+            <Setter Property="Height" Value="24" />
+            <Setter Property="MinHeight" Value="0" />
+        </Style>
+
         <!-- Icon-only buttons: flat and 24x24, like toolbar buttons. -->
         <Style Selector="Button.icon">
             <Setter Property="Background" Value="Transparent" />
@@ -22,6 +41,19 @@
         <Style Selector="Button.icon TextBlock.icon">
             <Setter Property="FontSize" Value="18" />
         </Style>
+        <!-- Icon-only toggles: 24x24 like the buttons, lit with the accent while on. -->
+        <Style Selector="ToggleButton.icon">
+            <Setter Property="Width" Value="24" />
+            <Setter Property="Height" Value="24" />
+            <Setter Property="MinWidth" Value="0" />
+            <Setter Property="Padding" Value="0" />
+        </Style>
+        <Style Selector="ToggleButton.icon TextBlock.icon">
+            <Setter Property="FontFamily" Value="{StaticResource MaterialDesignIcons}" />
+            <Setter Property="FontSize" Value="18" />
+            <Setter Property="HorizontalAlignment" Value="Center" />
+            <Setter Property="VerticalAlignment" Value="Center" />
+        </Style>
         <!-- The roll and the keyboard sit on the same dark strip, so the bars appear to land on the keys. -->
         <Style Selector="Border.stage">
             <Setter Property="Background" Value="#1A1A1A" />
@@ -33,8 +65,9 @@
     </Window.Styles>
 
     <DockPanel>
-        <!-- Toolbar -->
-        <DockPanel DockPanel.Dock="Top" Margin="8,0,8,0">
+        <!-- Toolbar: one row, or two while the keyboard is split. -->
+        <StackPanel DockPanel.Dock="Top">
+        <DockPanel Classes="toolbar" Margin="8,0,8,0" LastChildFill="False">
             <Button x:Name="OpenButton" DockPanel.Dock="Left" Click="OpenMidi_Click" Margin="0,0,8,0"
                     h:Tip.Title="Open MIDI file (Ctrl+O)"
                     h:Tip.Text="Choose a .mid file to watch and play.">
@@ -66,6 +99,19 @@
                 </StackPanel>
             </Button>
 
+            <ToggleButton x:Name="SplitToggle" Classes="icon" DockPanel.Dock="Left" Margin="8,0,0,0"
+                          IsCheckedChanged="SplitToggle_Changed"
+                          h:Tip.Title="Keyboard split"
+                          h:Tip.Text="Play the song with two instruments: one for the keys left of the red line, one for the keys right of it. Drag the line in the roll to move the split.">
+                <TextBlock Classes="icon" Text="{x:Static h:Icons.ArrowSplitVertical}" />
+            </ToggleButton>
+            <ToggleButton x:Name="SplitControlsToggle" Classes="icon" DockPanel.Dock="Left" Margin="4,0,0,0"
+                          IsEnabled="False" IsCheckedChanged="SplitControls_Changed"
+                          h:Tip.Title="Show split controls"
+                          h:Tip.Text="Show or hide the split's instrument and gain row and its red line. The split keeps playing either way, so it can be hidden for a clean view.">
+                <TextBlock Classes="icon" Text="{x:Static h:Icons.TuneVertical}" />
+            </ToggleButton>
+
             <Button x:Name="FullScreenButton" Classes="icon" DockPanel.Dock="Right" Click="FullScreen_Click"
                     Margin="4,0,0,0"
                     h:Tip.Title="Full screen (F11)"
@@ -83,16 +129,54 @@
             <Slider x:Name="VolumeSlider" DockPanel.Dock="Right" Width="110" Minimum="0" Maximum="1"
                     VerticalAlignment="Center" Margin="8,0,8,0"
                     h:Tip.Title="Volume" h:Tip.Text="How loud the keyboard plays." />
-            <TextBlock DockPanel.Dock="Right" VerticalAlignment="Center"
-                       FontFamily="{StaticResource MaterialDesignIcons}" FontSize="16"
-                       Text="{x:Static h:Icons.VolumeHigh}" />
+            <!-- Sized and centred exactly like an icon button's glyph, so it lines up with them. -->
+            <Border DockPanel.Dock="Right" Width="24" Height="24">
+                <TextBlock FontFamily="{StaticResource MaterialDesignIcons}" FontSize="18"
+                           HorizontalAlignment="Center" VerticalAlignment="Center"
+                           Text="{x:Static h:Icons.VolumeHigh}" />
+            </Border>
 
             <TextBlock x:Name="TimeText" DockPanel.Dock="Right" Classes="dim" VerticalAlignment="Center"
                        Margin="12,0,12,0" Text="0:00 / 0:00" />
 
-            <TextBlock x:Name="StatusText" Classes="dim" VerticalAlignment="Center" Margin="12,0,0,0"
-                       TextTrimming="CharacterEllipsis" Text="No MIDI file open." />
         </DockPanel>
+
+        <!-- The split's two halves: the left voice 8px from the left edge, the right voice
+             8px past the middle, each with its instrument and a gain to lift or lower it. -->
+        <Grid x:Name="SplitBar" ColumnDefinitions="*,*" IsVisible="False">
+            <StackPanel Grid.Column="0" Classes="toolbar" Orientation="Horizontal" Spacing="8" Margin="8,0,0,0">
+                <TextBlock Text="Left" Classes="dim" VerticalAlignment="Center" />
+                <Button x:Name="LeftInstrumentButton" Click="LeftInstrument_Click"
+                        h:Tip.Title="Left instrument"
+                        h:Tip.Text="What the keys left of the red line play.">
+                    <StackPanel Orientation="Horizontal" Spacing="6">
+                        <TextBlock Classes="icon" Text="{x:Static h:Icons.Piano}" />
+                        <TextBlock x:Name="LeftInstrumentText" Classes="label" Text="Real bass" />
+                    </StackPanel>
+                </Button>
+                <Slider x:Name="LeftGainSlider" Width="120" Minimum="-12" Maximum="12" Value="0"
+                        TickFrequency="1" IsSnapToTickEnabled="True" VerticalAlignment="Center"
+                        h:Tip.Title="Left gain" h:Tip.Text="Make the left instrument louder or quieter." />
+                <TextBlock x:Name="LeftGainText" Classes="dim" VerticalAlignment="Center" Width="48" Text="0 dB" />
+            </StackPanel>
+
+            <StackPanel Grid.Column="1" Classes="toolbar" Orientation="Horizontal" Spacing="8" Margin="8,0,0,0">
+                <TextBlock Text="Right" Classes="dim" VerticalAlignment="Center" />
+                <Button x:Name="RightInstrumentButton" Click="Instrument_Click"
+                        h:Tip.Title="Right instrument"
+                        h:Tip.Text="What the keys right of the red line play.">
+                    <StackPanel Orientation="Horizontal" Spacing="6">
+                        <TextBlock Classes="icon" Text="{x:Static h:Icons.Piano}" />
+                        <TextBlock x:Name="RightInstrumentText" Classes="label" Text="Piano" />
+                    </StackPanel>
+                </Button>
+                <Slider x:Name="RightGainSlider" Width="120" Minimum="-12" Maximum="12" Value="0"
+                        TickFrequency="1" IsSnapToTickEnabled="True" VerticalAlignment="Center"
+                        h:Tip.Title="Right gain" h:Tip.Text="Make the right instrument louder or quieter." />
+                <TextBlock x:Name="RightGainText" Classes="dim" VerticalAlignment="Center" Width="48" Text="0 dB" />
+            </StackPanel>
+        </Grid>
+        </StackPanel>
 
         <Grid ColumnDefinitions="*,Auto" RowDefinitions="*,Auto">
             <!-- The falling notes. -->

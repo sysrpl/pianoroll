@@ -95,6 +95,17 @@ public class PianoKeyboard : Control
         return false;
     }
 
+    /// <summary>
+    /// Shows every key as up again and forgets the one the mouse was holding. Used when playback
+    /// pauses or stops, after the sound itself has been silenced, so no key is left lit.
+    /// </summary>
+    public void ReleaseAll()
+    {
+        _held.Clear();
+        _mouseNote = -1;
+        InvalidateVisual();
+    }
+
     /// <summary>Shows a note as held, e.g. one played from somewhere other than the mouse.</summary>
     public void ShowPressed(int note, bool pressed)
     {

@@ -56,18 +56,15 @@ public partial class MainWindow : Window
         };
         Keyboard.NoteReleased += note => _engine.NoteOff(note);
         VolumeSlider.PropertyChanged += Volume_PropertyChanged;
+        SetUpSplit();
         _loading = false;
 
         SetUpPlayback();
 
-        // Opening the device late enough that a failure can be shown on the toolbar.
+        // If there is no sound output, say so once the window is up.
         _audio.Open();
         if (_audio.Error is { } error)
-        {
-            StatusText.Text = error;
-            StatusText.Classes.Set("error", true);
-            StatusText.Classes.Set("dim", false);
-        }
+            Opened += async (_, _) => await MessageDialog.ShowAsync(this, "No sound", error, isError: true);
 
         // A SoundFont can be 150MB, so it loads in the background once the window is up. The
         // keyboard plays with the built-in sounds until it arrives.
@@ -86,6 +83,7 @@ public partial class MainWindow : Window
         if (instrument.SampleFolder is not null)
             _ = EnsureSamplesAsync(instrument, announceErrors: save);
         InstrumentText.Text = instrument.Name;
+        RightInstrumentText.Text = instrument.Name;     // the split's right half is the main instrument
 
         if (!save)
             return;
@@ -186,6 +184,12 @@ public partial class MainWindow : Window
         {
             e.Handled = true;
             ToggleWallpaper();
+        }
+        else if (e.Key == Key.F2)
+        {
+            // Diagnostics: what the audio thread has been doing since the program started.
+            e.Handled = true;
+            _ = MessageDialog.ShowAsync(this, "Audio diagnostics", _audio.Stats.ToString(), isError: false);
         }
         base.OnKeyDown(e);
     }
