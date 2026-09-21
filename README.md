@@ -7,7 +7,7 @@ piano, saxophone, bass or electric guitar, or with sounds the program synthesise
 Built with .NET 8 and [Avalonia](https://avaloniaui.net/) for the interface, and
 [SDL2](https://www.libsdl.org/) for audio output, so it runs on Linux, Windows and macOS.
 
-https://github.com/user-attachments/assets/d870b253-1e9a-4240-be3c-930fc12c7ef1
+<video src="https://github.com/user-attachments/assets/d870b253-1e9a-4240-be3c-930fc12c7ef1" controls width="820"></video>
 
 ## Features
 
