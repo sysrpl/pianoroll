@@ -1,0 +1,46 @@
+<Application xmlns="https://github.com/avaloniaui"
+             xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+             xmlns:h="using:pianoroll.Helpers"
+             x:Class="pianoroll.App"
+             RequestedThemeVariant="Dark">
+
+    <Application.Resources>
+        <FontFamily x:Key="MaterialDesignIcons">avares://pianoroll/resources/materialdesignicons.ttf#Material Design Icons</FontFamily>
+    </Application.Resources>
+
+    <!-- How rich tooltips (h:Tip.Title / h:Tip.Text) look inside the bubble. -->
+    <Application.DataTemplates>
+        <DataTemplate DataType="h:TipContent" x:DataType="h:TipContent">
+            <StackPanel Spacing="3" MaxWidth="340">
+                <TextBlock Text="{Binding Title}" FontWeight="Bold" />
+                <TextBlock Text="{Binding Text}" TextWrapping="Wrap" IsVisible="{Binding Text, Converter={x:Static ObjectConverters.IsNotNull}}"
+                           Foreground="{DynamicResource MintDimTextBrush}" />
+            </StackPanel>
+        </DataTemplate>
+    </Application.DataTemplates>
+
+    <Application.Styles>
+        <FluentTheme DensityStyle="Compact">
+            <FluentTheme.Palettes>
+                <!-- Base colors for the Mint-Y-Dark look; src/Themes/MintDark.axaml fine-tunes controls. -->
+                <ColorPaletteResources x:Key="Dark"
+                                       Accent="#6AA0BD"
+                                       RegionColor="#383838"
+                                       BaseHigh="#DADADA"
+                                       BaseMedium="#9A9A9A"
+                                       BaseLow="#4A4A4A"
+                                       AltHigh="#2F2F2F"
+                                       AltMedium="#353535"
+                                       ChromeLow="#2F2F2F"
+                                       ChromeMediumLow="#353535"
+                                       ChromeMedium="#3A3A3A"
+                                       ChromeHigh="#4A4A4A"
+                                       ChromeAltLow="#DADADA"
+                                       ListLow="#4A4A4A"
+                                       ListMedium="#505050"
+                                       ErrorText="#CC575D" />
+            </FluentTheme.Palettes>
+        </FluentTheme>
+        <StyleInclude Source="avares://pianoroll/src/Themes/MintDark.axaml" />
+    </Application.Styles>
+</Application>

@@ -1,0 +1,421 @@
+<!--
+    Dark theme modelled on Linux Mint's Mint-Y-Dark-Aqua (as seen in Nemo).
+    Sits on top of FluentTheme (dark variant): the palette in App.axaml sets the
+    base colors; this file overrides specific Fluent resources and
+    adds a few styles. Colors are sampled from a Nemo screenshot.
+-->
+<Styles xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml">
+
+    <Styles.Resources>
+        <ResourceDictionary>
+            <!-- Palette -->
+            <Color x:Key="MintChromeColor">#2F2F2F</Color>      <!-- menu bar, toolbars -->
+            <Color x:Key="MintSidebarColor">#353535</Color>     <!-- headers -->
+            <Color x:Key="MintWindowColor">#383838</Color>      <!-- window / dialog background -->
+            <Color x:Key="MintViewColor">#404040</Color>        <!-- lists, log -->
+            <Color x:Key="MintEntryColor">#424242</Color>       <!-- text boxes -->
+            <Color x:Key="MintButtonColor">#454545</Color>
+            <Color x:Key="MintButtonHoverColor">#4F4F4F</Color>
+            <Color x:Key="MintButtonPressedColor">#3A3A3A</Color>
+            <Color x:Key="MintHoverColor">#4A4A4A</Color>
+            <Color x:Key="MintBorderColor">#2B2B2B</Color>
+            <Color x:Key="MintAccentColor">#6AA0BD</Color>
+            <Color x:Key="MintTextColor">#DADADA</Color>
+            <Color x:Key="MintDimTextColor">#BBBBBB</Color>
+            <Color x:Key="MintDisabledTextColor">#7A7A7A</Color>
+            <Color x:Key="MintSelectedTextColor">#FFFFFF</Color>
+            <Color x:Key="MintFolderColor">#8BB158</Color>
+            <Color x:Key="MintErrorColor">#CC575D</Color>
+
+            <SolidColorBrush x:Key="MintChromeBrush" Color="{StaticResource MintChromeColor}" />
+            <SolidColorBrush x:Key="MintSidebarBrush" Color="{StaticResource MintSidebarColor}" />
+            <SolidColorBrush x:Key="MintWindowBrush" Color="{StaticResource MintWindowColor}" />
+            <SolidColorBrush x:Key="MintViewBrush" Color="{StaticResource MintViewColor}" />
+            <SolidColorBrush x:Key="MintEntryBrush" Color="{StaticResource MintEntryColor}" />
+            <SolidColorBrush x:Key="MintButtonBrush" Color="{StaticResource MintButtonColor}" />
+            <SolidColorBrush x:Key="MintButtonHoverBrush" Color="{StaticResource MintButtonHoverColor}" />
+            <SolidColorBrush x:Key="MintButtonPressedBrush" Color="{StaticResource MintButtonPressedColor}" />
+            <SolidColorBrush x:Key="MintHoverBrush" Color="{StaticResource MintHoverColor}" />
+            <SolidColorBrush x:Key="MintBorderBrush" Color="{StaticResource MintBorderColor}" />
+            <SolidColorBrush x:Key="MintAccentBrush" Color="{StaticResource MintAccentColor}" />
+            <SolidColorBrush x:Key="MintTextBrush" Color="{StaticResource MintTextColor}" />
+            <SolidColorBrush x:Key="MintDimTextBrush" Color="{StaticResource MintDimTextColor}" />
+            <SolidColorBrush x:Key="MintDisabledTextBrush" Color="{StaticResource MintDisabledTextColor}" />
+            <SolidColorBrush x:Key="MintSelectedTextBrush" Color="{StaticResource MintSelectedTextColor}" />
+            <SolidColorBrush x:Key="MintFolderBrush" Color="{StaticResource MintFolderColor}" />
+            <SolidColorBrush x:Key="MintErrorBrush" Color="{StaticResource MintErrorColor}" />
+            <SolidColorBrush x:Key="MintTipBrush" Color="#262626" />
+            <SolidColorBrush x:Key="MintTipBorderBrush" Color="#5A5A5A" />
+
+            <!-- Font: Ubuntu Regular 10pt (10pt = 13.333 device-independent pixels). The folder form loads every
+                 "Ubuntu" font in resources/ (Ubuntu-Regular.ttf, Ubuntu-Bold.ttf), so bold text uses the real bold. -->
+            <FontFamily x:Key="ContentControlThemeFontFamily">avares://pianoroll/resources#Ubuntu</FontFamily>
+            <x:Double x:Key="ControlContentThemeFontSize">13.333</x:Double>
+
+            <CornerRadius x:Key="ControlCornerRadius">3</CornerRadius>
+            <CornerRadius x:Key="OverlayCornerRadius">4</CornerRadius>
+
+            <!-- Text boxes -->
+            <StaticResource x:Key="TextControlBackground" ResourceKey="MintEntryBrush" />
+            <StaticResource x:Key="TextControlBackgroundPointerOver" ResourceKey="MintEntryBrush" />
+            <StaticResource x:Key="TextControlBackgroundFocused" ResourceKey="MintEntryBrush" />
+            <StaticResource x:Key="TextControlBackgroundDisabled" ResourceKey="MintWindowBrush" />
+            <StaticResource x:Key="TextControlBorderBrush" ResourceKey="MintBorderBrush" />
+            <StaticResource x:Key="TextControlBorderBrushPointerOver" ResourceKey="MintBorderBrush" />
+            <StaticResource x:Key="TextControlBorderBrushFocused" ResourceKey="MintAccentBrush" />
+            <StaticResource x:Key="TextControlForeground" ResourceKey="MintTextBrush" />
+            <StaticResource x:Key="TextControlForegroundPointerOver" ResourceKey="MintTextBrush" />
+            <StaticResource x:Key="TextControlForegroundFocused" ResourceKey="MintTextBrush" />
+            <StaticResource x:Key="TextControlSelectionHighlightColor" ResourceKey="MintAccentBrush" />
+            <Thickness x:Key="TextControlBorderThemeThicknessFocused">1</Thickness>
+
+            <!-- Buttons -->
+            <StaticResource x:Key="ButtonBackground" ResourceKey="MintButtonBrush" />
+            <StaticResource x:Key="ButtonBackgroundPointerOver" ResourceKey="MintButtonHoverBrush" />
+            <StaticResource x:Key="ButtonBackgroundPressed" ResourceKey="MintButtonPressedBrush" />
+            <StaticResource x:Key="ButtonBorderBrush" ResourceKey="MintBorderBrush" />
+            <StaticResource x:Key="ButtonBorderBrushPointerOver" ResourceKey="MintBorderBrush" />
+            <StaticResource x:Key="ButtonBorderBrushPressed" ResourceKey="MintBorderBrush" />
+            <StaticResource x:Key="ButtonForeground" ResourceKey="MintTextBrush" />
+            <StaticResource x:Key="ButtonForegroundPointerOver" ResourceKey="MintTextBrush" />
+            <StaticResource x:Key="ButtonForegroundPressed" ResourceKey="MintTextBrush" />
+            <StaticResource x:Key="ButtonForegroundDisabled" ResourceKey="MintDisabledTextBrush" />
+
+            <!-- Combo boxes -->
+            <StaticResource x:Key="ComboBoxBackground" ResourceKey="MintButtonBrush" />
+            <StaticResource x:Key="ComboBoxBackgroundPointerOver" ResourceKey="MintButtonHoverBrush" />
+            <StaticResource x:Key="ComboBoxBackgroundPressed" ResourceKey="MintButtonPressedBrush" />
+            <StaticResource x:Key="ComboBoxBackgroundUnfocused" ResourceKey="MintButtonBrush" />
+            <StaticResource x:Key="ComboBoxBorderBrush" ResourceKey="MintBorderBrush" />
+            <StaticResource x:Key="ComboBoxBorderBrushPointerOver" ResourceKey="MintBorderBrush" />
+            <StaticResource x:Key="ComboBoxBorderBrushPressed" ResourceKey="MintBorderBrush" />
+            <StaticResource x:Key="ComboBoxForeground" ResourceKey="MintTextBrush" />
+            <StaticResource x:Key="ComboBoxDropDownBackground" ResourceKey="MintWindowBrush" />
+            <StaticResource x:Key="ComboBoxDropDownBorderBrush" ResourceKey="MintBorderBrush" />
+            <StaticResource x:Key="ComboBoxDropDownGlyphForeground" ResourceKey="MintTextBrush" />
+            <StaticResource x:Key="ComboBoxItemBackgroundPointerOver" ResourceKey="MintHoverBrush" />
+            <StaticResource x:Key="ComboBoxItemBackgroundSelected" ResourceKey="MintAccentBrush" />
+            <StaticResource x:Key="ComboBoxItemBackgroundSelectedPointerOver" ResourceKey="MintAccentBrush" />
+            <StaticResource x:Key="ComboBoxItemForegroundSelected" ResourceKey="MintSelectedTextBrush" />
+            <StaticResource x:Key="ComboBoxItemForegroundSelectedPointerOver" ResourceKey="MintSelectedTextBrush" />
+
+            <!-- Check boxes -->
+            <StaticResource x:Key="CheckBoxCheckBackgroundFillUnchecked" ResourceKey="MintEntryBrush" />
+            <StaticResource x:Key="CheckBoxCheckBackgroundFillUncheckedPointerOver" ResourceKey="MintEntryBrush" />
+            <StaticResource x:Key="CheckBoxCheckBackgroundStrokeUnchecked" ResourceKey="MintBorderBrush" />
+            <StaticResource x:Key="CheckBoxCheckBackgroundStrokeUncheckedPointerOver" ResourceKey="MintBorderBrush" />
+            <StaticResource x:Key="CheckBoxCheckBackgroundFillChecked" ResourceKey="MintAccentBrush" />
+            <StaticResource x:Key="CheckBoxCheckBackgroundFillCheckedPointerOver" ResourceKey="MintAccentBrush" />
+            <StaticResource x:Key="CheckBoxCheckGlyphForegroundChecked" ResourceKey="MintSelectedTextBrush" />
+            <StaticResource x:Key="CheckBoxCheckGlyphForegroundCheckedPointerOver" ResourceKey="MintSelectedTextBrush" />
+            <StaticResource x:Key="CheckBoxForegroundUnchecked" ResourceKey="MintTextBrush" />
+            <StaticResource x:Key="CheckBoxForegroundChecked" ResourceKey="MintTextBrush" />
+
+            <!-- Menus: highlighted items use the accent, like Mint -->
+            <StaticResource x:Key="MenuFlyoutPresenterBackground" ResourceKey="MintWindowBrush" />
+            <StaticResource x:Key="MenuFlyoutPresenterBorderBrush" ResourceKey="MintBorderBrush" />
+            <StaticResource x:Key="MenuFlyoutItemBackgroundPointerOver" ResourceKey="MintAccentBrush" />
+            <StaticResource x:Key="MenuFlyoutItemBackgroundPressed" ResourceKey="MintAccentBrush" />
+            <StaticResource x:Key="MenuFlyoutItemForeground" ResourceKey="MintTextBrush" />
+            <StaticResource x:Key="MenuFlyoutItemForegroundPointerOver" ResourceKey="MintSelectedTextBrush" />
+            <StaticResource x:Key="MenuFlyoutItemForegroundPressed" ResourceKey="MintSelectedTextBrush" />
+            <StaticResource x:Key="MenuFlyoutItemForegroundDisabled" ResourceKey="MintDisabledTextBrush" />
+
+            <!-- List boxes -->
+            <StaticResource x:Key="SystemControlHighlightListLowBrush" ResourceKey="MintHoverBrush" />
+            <StaticResource x:Key="SystemControlHighlightListAccentLowBrush" ResourceKey="MintAccentBrush" />
+            <StaticResource x:Key="SystemControlHighlightListAccentMediumBrush" ResourceKey="MintAccentBrush" />
+            <StaticResource x:Key="SystemControlHighlightListAccentHighBrush" ResourceKey="MintAccentBrush" />
+
+            <!-- Tooltips -->
+            <StaticResource x:Key="ToolTipBackground" ResourceKey="MintChromeBrush" />
+            <StaticResource x:Key="ToolTipBorderBrush" ResourceKey="MintBorderBrush" />
+            <StaticResource x:Key="ToolTipForeground" ResourceKey="MintTextBrush" />
+
+            <!-- Tabs: the frame around the tab headers and the page (styles below) -->
+            <SolidColorBrush x:Key="MintFrameBrush" Color="#5A5A5A" />
+
+            <!-- Scroll bars (styles below) -->
+            <SolidColorBrush x:Key="MintScrollTrackBrush" Color="#26000000" />
+            <SolidColorBrush x:Key="MintScrollThumbBrush" Color="#6E6E6E" />
+            <SolidColorBrush x:Key="MintScrollThumbHoverBrush" Color="#8C8C8C" />
+
+            <!-- Expanders -->
+            <StaticResource x:Key="ExpanderHeaderBackground" ResourceKey="MintWindowBrush" />
+            <StaticResource x:Key="ExpanderHeaderBackgroundPointerOver" ResourceKey="MintHoverBrush" />
+            <StaticResource x:Key="ExpanderHeaderBackgroundPressed" ResourceKey="MintButtonPressedBrush" />
+            <StaticResource x:Key="ExpanderHeaderBorderBrush" ResourceKey="MintBorderBrush" />
+            <StaticResource x:Key="ExpanderHeaderBorderBrushPointerOver" ResourceKey="MintBorderBrush" />
+            <StaticResource x:Key="ExpanderHeaderBorderBrushPressed" ResourceKey="MintBorderBrush" />
+            <StaticResource x:Key="ExpanderContentBackground" ResourceKey="MintWindowBrush" />
+            <StaticResource x:Key="ExpanderContentBorderBrush" ResourceKey="MintBorderBrush" />
+            <x:Double x:Key="ExpanderMinHeight">30</x:Double>
+        </ResourceDictionary>
+    </Styles.Resources>
+
+    <!-- Windows and chrome -->
+    <Style Selector="Window">
+        <Setter Property="Background" Value="{DynamicResource MintWindowBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource MintTextBrush}" />
+        <Setter Property="FontFamily" Value="{DynamicResource ContentControlThemeFontFamily}" />
+        <Setter Property="FontSize" Value="{DynamicResource ControlContentThemeFontSize}" />
+        <!-- The app icon, shown in the taskbar and title bars. -->
+        <Setter Property="Icon" Value="/resources/icon.png" />
+    </Style>
+
+    <!-- Buttons: 25px tall and at least 75px wide. Toolbar and icon buttons override this in their views. -->
+    <Style Selector="Button">
+        <Setter Property="Height" Value="25" />
+        <Setter Property="MinWidth" Value="75" />
+        <Setter Property="Padding" Value="8,0" />
+        <Setter Property="HorizontalContentAlignment" Value="Center" />
+        <Setter Property="VerticalContentAlignment" Value="Center" />
+    </Style>
+    <!-- A dialog's row of buttons: 8px from the window's edges and 8px apart. -->
+    <Style Selector="StackPanel.dialogButtons">
+        <Setter Property="Orientation" Value="Horizontal" />
+        <Setter Property="HorizontalAlignment" Value="Right" />
+        <Setter Property="Spacing" Value="8" />
+        <Setter Property="Margin" Value="8" />
+    </Style>
+    <Style Selector="Menu">
+        <Setter Property="Background" Value="{DynamicResource MintChromeBrush}" />
+    </Style>
+    <!--
+        Menus are short enough to never scroll. Fluent wraps each drop-down in a scroll viewer that shows
+        a down chevron when the content is a fraction of a pixel taller than the popup (fractional font
+        sizes such as 10pt = 13.333px cause this), so turn the scrolling off.
+    -->
+    <Style Selector="MenuItem /template/ ScrollViewer, ContextMenu /template/ ScrollViewer">
+        <Setter Property="VerticalScrollBarVisibility" Value="Disabled" />
+    </Style>
+    <!-- Menu separators: half as visible, so they divide without drawing attention. -->
+    <Style Selector="Separator">
+        <Setter Property="Opacity" Value="0.5" />
+    </Style>
+    <Style Selector="GridSplitter">
+        <Setter Property="Background" Value="{DynamicResource MintChromeBrush}" />
+    </Style>
+
+    <!--
+        Tooltips: a rounded bubble below the item, with a tail in the middle pointing up at it.
+        Placement "Bottom" centres the bubble under the item, so the tail lines up with its middle.
+        Rich tips (h:Tip.Title / h:Tip.Text) get a bold title over a description; see App.axaml.
+    -->
+    <Style Selector=":is(Control)">
+        <Setter Property="ToolTip.Placement" Value="Bottom" />
+        <Setter Property="ToolTip.VerticalOffset" Value="2" />
+        <Setter Property="ToolTip.HorizontalOffset" Value="0" />
+        <Setter Property="ToolTip.ShowDelay" Value="500" />
+    </Style>
+    <Style Selector="ToolTip">
+        <Setter Property="Background" Value="Transparent" />
+        <Setter Property="BorderThickness" Value="0" />
+        <Setter Property="Padding" Value="0" />
+        <Setter Property="MaxWidth" Value="380" />
+        <Setter Property="Foreground" Value="{DynamicResource MintTextBrush}" />
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Grid RowDefinitions="Auto,*">
+                    <Border Grid.Row="1" Background="{DynamicResource MintTipBrush}"
+                            BorderBrush="{DynamicResource MintTipBorderBrush}" BorderThickness="1"
+                            CornerRadius="6" Padding="12,8" BoxShadow="0 3 10 0 #66000000">
+                        <ContentPresenter Content="{TemplateBinding Content}"
+                                          ContentTemplate="{TemplateBinding ContentTemplate}"
+                                          TextWrapping="Wrap" />
+                    </Border>
+                    <!-- The tail. Drawn after the bubble and overlapping it by 1px, so it hides the
+                         bubble's top border where they meet; the stroke is open along the bottom. -->
+                    <Path Grid.Row="0" HorizontalAlignment="Center" Margin="0,0,0,-1"
+                          Data="M 0,8 L 8,0 L 16,8"
+                          Fill="{DynamicResource MintTipBrush}"
+                          Stroke="{DynamicResource MintTipBorderBrush}" StrokeThickness="1" />
+                </Grid>
+            </ControlTemplate>
+        </Setter>
+    </Style>
+
+    <!--
+        Tabs: a classic notebook. Each header is a box with a rounded top. The selected one is
+        taller, has an accent strip along its top, and has the page's background and no bottom
+        edge, so it opens straight into the page; the others are darker and sit a little lower.
+    -->
+    <Style Selector="TabControl">
+        <Setter Property="Padding" Value="8" />
+        <Setter Property="ItemsPanel">
+            <ItemsPanelTemplate>
+                <StackPanel Orientation="Horizontal" />
+            </ItemsPanelTemplate>
+        </Setter>
+        <Setter Property="Template">
+            <ControlTemplate>
+                <DockPanel>
+                    <Grid DockPanel.Dock="Top">
+                        <!-- The page's top edge, under the headers. Drawn first, so the selected
+                             header (which has no bottom edge) paints over it. -->
+                        <Border Height="1" VerticalAlignment="Bottom" Background="{DynamicResource MintFrameBrush}" />
+                        <ItemsPresenter Name="TabStrip" ItemsPanel="{TemplateBinding ItemsPanel}" />
+                    </Grid>
+                    <Border Background="{DynamicResource MintWindowBrush}" BorderBrush="{DynamicResource MintFrameBrush}"
+                            BorderThickness="1,0,1,1" CornerRadius="0,0,3,3" Padding="{TemplateBinding Padding}">
+                        <ContentPresenter Name="PART_SelectedContentHost"
+                                          Content="{TemplateBinding SelectedContent}"
+                                          ContentTemplate="{TemplateBinding SelectedContentTemplate}" />
+                    </Border>
+                </DockPanel>
+            </ControlTemplate>
+        </Setter>
+    </Style>
+    <Style Selector="TabItem">
+        <Setter Property="Background" Value="{DynamicResource MintChromeBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource MintDimTextBrush}" />
+        <Setter Property="BorderBrush" Value="{DynamicResource MintFrameBrush}" />
+        <Setter Property="BorderThickness" Value="1" />
+        <Setter Property="FontSize" Value="{DynamicResource ControlContentThemeFontSize}" />
+        <Setter Property="MinHeight" Value="0" />
+        <Setter Property="Padding" Value="16,5" />
+        <Setter Property="Margin" Value="0,3,2,0" />
+        <Setter Property="VerticalAlignment" Value="Bottom" />
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Border Background="{TemplateBinding Background}" BorderBrush="{TemplateBinding BorderBrush}"
+                        BorderThickness="{TemplateBinding BorderThickness}" CornerRadius="3,3,0,0">
+                    <Panel>
+                        <ContentPresenter Name="TabHeader" Padding="{TemplateBinding Padding}"
+                                          Content="{TemplateBinding Header}"
+                                          ContentTemplate="{TemplateBinding HeaderTemplate}"
+                                          HorizontalContentAlignment="Center" VerticalContentAlignment="Center" />
+                        <Border Name="TabAccent" Height="2" VerticalAlignment="Top" CornerRadius="2,2,0,0"
+                                Background="{DynamicResource MintAccentBrush}" IsVisible="False" />
+                    </Panel>
+                </Border>
+            </ControlTemplate>
+        </Setter>
+    </Style>
+    <Style Selector="TabItem:pointerover">
+        <Setter Property="Background" Value="{DynamicResource MintHoverBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource MintTextBrush}" />
+    </Style>
+    <!-- No bottom edge; one more pixel of padding keeps its height and covers the page's top edge. -->
+    <Style Selector="TabItem:selected, TabItem:selected:pointerover">
+        <Setter Property="Background" Value="{DynamicResource MintWindowBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource MintTextBrush}" />
+        <Setter Property="BorderThickness" Value="1,1,1,0" />
+        <Setter Property="Padding" Value="16,5,16,6" />
+        <Setter Property="Margin" Value="0,0,2,0" />
+    </Style>
+    <Style Selector="TabItem:selected /template/ Border#TabAccent">
+        <Setter Property="IsVisible" Value="True" />
+    </Style>
+
+    <!--
+        Scroll bars: thin Mint-Y bars that stay on screen. A rounded thumb on a faint track, with
+        no arrow buttons; clicking the track pages. They replace Fluent's wide bars with arrows.
+    -->
+    <!-- Scroll viewers pass their own AllowAutoHide to their bars, so set it there too. -->
+    <Style Selector="ScrollViewer">
+        <Setter Property="AllowAutoHide" Value="False" />
+    </Style>
+    <Style Selector="ScrollBar">
+        <Setter Property="AllowAutoHide" Value="False" />
+        <Setter Property="MinWidth" Value="0" />
+        <Setter Property="MinHeight" Value="0" />
+    </Style>
+    <Style Selector="ScrollBar:vertical">
+        <Setter Property="Width" Value="8" />
+        <Setter Property="Margin" Value="0,2,2,2" />
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Border Background="{DynamicResource MintScrollTrackBrush}" CornerRadius="4">
+                    <!-- Reversed, so the top of the bar is the start, as in Fluent's template. -->
+                    <Track Name="PART_Track" Orientation="Vertical" IsDirectionReversed="True"
+                           Minimum="{TemplateBinding Minimum}" Maximum="{TemplateBinding Maximum}"
+                           Value="{TemplateBinding Value, Mode=TwoWay}" ViewportSize="{TemplateBinding ViewportSize}">
+                        <Track.DecreaseButton>
+                            <RepeatButton Name="PART_PageUpButton" Classes="scrollPage" Focusable="False" />
+                        </Track.DecreaseButton>
+                        <Track.IncreaseButton>
+                            <RepeatButton Name="PART_PageDownButton" Classes="scrollPage" Focusable="False" />
+                        </Track.IncreaseButton>
+                        <Thumb Classes="scrollThumb" />
+                    </Track>
+                </Border>
+            </ControlTemplate>
+        </Setter>
+    </Style>
+    <Style Selector="ScrollBar:horizontal">
+        <Setter Property="Height" Value="8" />
+        <Setter Property="Margin" Value="2,0,2,2" />
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Border Background="{DynamicResource MintScrollTrackBrush}" CornerRadius="4">
+                    <Track Name="PART_Track" Orientation="Horizontal"
+                           Minimum="{TemplateBinding Minimum}" Maximum="{TemplateBinding Maximum}"
+                           Value="{TemplateBinding Value, Mode=TwoWay}" ViewportSize="{TemplateBinding ViewportSize}">
+                        <Track.DecreaseButton>
+                            <RepeatButton Name="PART_PageUpButton" Classes="scrollPage" Focusable="False" />
+                        </Track.DecreaseButton>
+                        <Track.IncreaseButton>
+                            <RepeatButton Name="PART_PageDownButton" Classes="scrollPage" Focusable="False" />
+                        </Track.IncreaseButton>
+                        <Thumb Classes="scrollThumb" />
+                    </Track>
+                </Border>
+            </ControlTemplate>
+        </Setter>
+    </Style>
+    <!-- The track either side of the thumb: invisible, but clickable to page. -->
+    <Style Selector="RepeatButton.scrollPage">
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Border Background="Transparent" />
+            </ControlTemplate>
+        </Setter>
+    </Style>
+    <Style Selector="Thumb.scrollThumb">
+        <Setter Property="Background" Value="{DynamicResource MintScrollThumbBrush}" />
+        <Setter Property="Template">
+            <ControlTemplate>
+                <Border Background="{TemplateBinding Background}" CornerRadius="4" />
+            </ControlTemplate>
+        </Setter>
+    </Style>
+    <Style Selector="Thumb.scrollThumb:pointerover">
+        <Setter Property="Background" Value="{DynamicResource MintScrollThumbHoverBrush}" />
+    </Style>
+    <Style Selector="Thumb.scrollThumb:pressed">
+        <Setter Property="Background" Value="{DynamicResource MintAccentBrush}" />
+    </Style>
+
+    <!-- Section headings: a bold title over a group of related controls. -->
+    <Style Selector="TextBlock.groupTitle">
+        <Setter Property="FontWeight" Value="Bold" />
+        <Setter Property="Margin" Value="0,0,0,8" />
+    </Style>
+
+    <!-- Progress bars: as tall as a button, so a caption can sit on top. -->
+    <Style Selector="ProgressBar">
+        <Setter Property="Background" Value="{DynamicResource MintEntryBrush}" />
+        <Setter Property="Foreground" Value="{DynamicResource MintAccentBrush}" />
+        <Setter Property="CornerRadius" Value="3" />
+    </Style>
+
+    <!-- Icon + caption buttons: the icon comes from the Material Design Icons font. -->
+    <Style Selector="Button TextBlock.icon">
+        <Setter Property="FontFamily" Value="{StaticResource MaterialDesignIcons}" />
+        <Setter Property="FontSize" Value="16" />
+        <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+    <Style Selector="Button TextBlock.label">
+        <Setter Property="VerticalAlignment" Value="Center" />
+    </Style>
+
+    <!-- Shared text classes -->
+    <Style Selector="TextBlock.error">
+        <Setter Property="Foreground" Value="{DynamicResource MintErrorBrush}" />
+    </Style>
+    <Style Selector="TextBlock.dim">
+        <Setter Property="Foreground" Value="{DynamicResource MintDimTextBrush}" />
+    </Style>
+</Styles>

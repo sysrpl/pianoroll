@@ -1,0 +1,122 @@
+<Window xmlns="https://github.com/avaloniaui"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:h="using:pianoroll.Helpers"
+        xmlns:c="using:pianoroll.Controls"
+        x:Class="pianoroll.Views.MainWindow"
+        Title="Piano Roll"
+        Icon="/images/icon.png"
+        Width="1000" Height="700"
+        MinWidth="720" MinHeight="460"
+        WindowStartupLocation="CenterScreen">
+
+    <Window.Styles>
+        <!-- Icon-only buttons: flat and 24x24, like toolbar buttons. -->
+        <Style Selector="Button.icon">
+            <Setter Property="Background" Value="Transparent" />
+            <Setter Property="BorderThickness" Value="0" />
+            <Setter Property="Width" Value="24" />
+            <Setter Property="Height" Value="24" />
+            <Setter Property="MinWidth" Value="0" />
+            <Setter Property="Padding" Value="0" />
+        </Style>
+        <Style Selector="Button.icon TextBlock.icon">
+            <Setter Property="FontSize" Value="18" />
+        </Style>
+        <!-- The roll and the keyboard sit on the same dark strip, so the bars appear to land on the keys. -->
+        <Style Selector="Border.stage">
+            <Setter Property="Background" Value="#1A1A1A" />
+        </Style>
+        <Style Selector="Border#KeyboardArea">
+            <Setter Property="BorderBrush" Value="{DynamicResource MintBorderBrush}" />
+            <Setter Property="BorderThickness" Value="0,1,0,0" />
+        </Style>
+    </Window.Styles>
+
+    <DockPanel>
+        <!-- Toolbar -->
+        <DockPanel DockPanel.Dock="Top" Margin="8,0,8,0">
+            <Button x:Name="OpenButton" DockPanel.Dock="Left" Click="OpenMidi_Click" Margin="0,0,8,0"
+                    h:Tip.Title="Open MIDI file (Ctrl+O)"
+                    h:Tip.Text="Choose a .mid file to watch and play.">
+                <StackPanel Orientation="Horizontal" Spacing="6">
+                    <TextBlock Classes="icon" Text="{x:Static h:Icons.FolderOpen}" />
+                    <TextBlock Classes="label" Text="Open..." />
+                </StackPanel>
+            </Button>
+
+            <Button x:Name="PlayButton" Classes="icon" DockPanel.Dock="Left" Click="Play_Click"
+                    h:Tip.Title="Play" h:Tip.Text="Start the song from where the playhead is.">
+                <TextBlock Classes="icon" Text="{x:Static h:Icons.Play}" />
+            </Button>
+            <Button x:Name="PauseButton" Classes="icon" DockPanel.Dock="Left" Click="Pause_Click" Margin="4,0,0,0"
+                    h:Tip.Title="Pause" h:Tip.Text="Stop where it is; playing again carries on from here.">
+                <TextBlock Classes="icon" Text="{x:Static h:Icons.Pause}" />
+            </Button>
+            <Button x:Name="StopButton" Classes="icon" DockPanel.Dock="Left" Click="Stop_Click" Margin="4,0,0,0"
+                    h:Tip.Title="Stop" h:Tip.Text="Stop and rewind to the beginning.">
+                <TextBlock Classes="icon" Text="{x:Static h:Icons.Stop}" />
+            </Button>
+
+            <Button x:Name="InstrumentButton" DockPanel.Dock="Left" Click="Instrument_Click" Margin="12,0,0,0"
+                    h:Tip.Title="Instrument"
+                    h:Tip.Text="Choose what the keys sound like: piano, organ, electric guitar or banjo.">
+                <StackPanel Orientation="Horizontal" Spacing="6">
+                    <TextBlock Classes="icon" Text="{x:Static h:Icons.Piano}" />
+                    <TextBlock x:Name="InstrumentText" Classes="label" Text="Piano" />
+                </StackPanel>
+            </Button>
+
+            <Button x:Name="FullScreenButton" Classes="icon" DockPanel.Dock="Right" Click="FullScreen_Click"
+                    Margin="4,0,0,0"
+                    h:Tip.Title="Full screen (F11)"
+                    h:Tip.Text="Fill the screen with the keyboard and the falling notes.">
+                <TextBlock x:Name="FullScreenIcon" Classes="icon" Text="{x:Static h:Icons.Fullscreen}" />
+            </Button>
+
+            <Button Classes="icon" DockPanel.Dock="Right" Click="About_Click"
+                    h:Tip.Title="About Piano Roll"
+                    h:Tip.Text="Version, what the program does, and build information.">
+                <TextBlock Classes="icon" Text="{x:Static h:Icons.HelpCircleOutline}" />
+            </Button>
+
+            <!-- Volume, at the right-hand end of the toolbar. -->
+            <Slider x:Name="VolumeSlider" DockPanel.Dock="Right" Width="110" Minimum="0" Maximum="1"
+                    VerticalAlignment="Center" Margin="8,0,8,0"
+                    h:Tip.Title="Volume" h:Tip.Text="How loud the keyboard plays." />
+            <TextBlock DockPanel.Dock="Right" VerticalAlignment="Center"
+                       FontFamily="{StaticResource MaterialDesignIcons}" FontSize="16"
+                       Text="{x:Static h:Icons.VolumeHigh}" />
+
+            <TextBlock x:Name="TimeText" DockPanel.Dock="Right" Classes="dim" VerticalAlignment="Center"
+                       Margin="12,0,12,0" Text="0:00 / 0:00" />
+
+            <TextBlock x:Name="StatusText" Classes="dim" VerticalAlignment="Center" Margin="12,0,0,0"
+                       TextTrimming="CharacterEllipsis" Text="No MIDI file open." />
+        </DockPanel>
+
+        <Grid ColumnDefinitions="*,Auto" RowDefinitions="*,Auto">
+            <!-- The falling notes. -->
+            <Border Grid.Row="0" Grid.Column="0" Classes="stage" Padding="8,8,8,0">
+                <Grid>
+                    <c:PianoRoll x:Name="Roll" LookAhead="4" />
+                    <TextBlock x:Name="PlaceholderText" Classes="dim" TextWrapping="Wrap"
+                               HorizontalAlignment="Center" VerticalAlignment="Center"
+                               Text="Click the keys below to play them, or open a MIDI file to watch it play." />
+                </Grid>
+            </Border>
+
+            <!-- The seek bar runs down the right of both the roll and the keyboard. -->
+            <Border Grid.Row="0" Grid.RowSpan="2" Grid.Column="1" Classes="stage" Padding="4,8">
+                <c:SeekBar x:Name="Seek" />
+            </Border>
+
+            <!-- The keyboard along the bottom. -->
+            <!-- No fixed height: the keyboard asks for one that keeps the keys in proportion. -->
+            <Border x:Name="KeyboardArea" Grid.Row="1" Grid.Column="0" Classes="stage"
+                    Padding="8">
+                <!-- A full-sized piano: A0 to C8. -->
+                <c:PianoKeyboard x:Name="Keyboard" FirstNote="21" LastNote="108" />
+            </Border>
+        </Grid>
+    </DockPanel>
+</Window>

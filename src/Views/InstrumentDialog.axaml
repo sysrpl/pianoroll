@@ -1,0 +1,34 @@
+<v:DialogWindow xmlns="https://github.com/avaloniaui"
+        xmlns:v="using:pianoroll.Views"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        xmlns:m="using:pianoroll.Models"
+        x:Class="pianoroll.Views.InstrumentDialog"
+        Title="Instrument"
+        Width="440" Height="430"
+        CanResize="False"
+        ShowInTaskbar="False"
+        WindowStartupLocation="CenterOwner">
+
+    <DockPanel>
+        <StackPanel Classes="dialogButtons" DockPanel.Dock="Bottom">
+            <Button Content="OK" Classes="accent" IsDefault="True" Click="Ok_Click" />
+            <Button Content="Cancel" IsCancel="True" Click="Cancel_Click" />
+        </StackPanel>
+
+        <DockPanel Margin="16,16,16,8">
+            <TextBlock DockPanel.Dock="Top" Classes="dim" TextWrapping="Wrap" Margin="0,0,0,8"
+                       Text="Choose the sound the keys are played with. Notes already ringing keep the old sound until they fade." />
+
+            <ListBox x:Name="InstrumentList" DoubleTapped="List_DoubleTapped">
+                <ListBox.ItemTemplate>
+                    <DataTemplate x:DataType="m:InstrumentInfo">
+                        <StackPanel Spacing="1" Margin="0,2">
+                            <TextBlock Text="{Binding Name}" />
+                            <TextBlock Text="{Binding Description}" Classes="dim" FontSize="11" TextWrapping="Wrap" />
+                        </StackPanel>
+                    </DataTemplate>
+                </ListBox.ItemTemplate>
+            </ListBox>
+        </DockPanel>
+    </DockPanel>
+</v:DialogWindow>

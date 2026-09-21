@@ -1,0 +1,31 @@
+<v:DialogWindow xmlns="https://github.com/avaloniaui"
+        xmlns:v="using:pianoroll.Views"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="pianoroll.Views.MessageDialog"
+        SizeToContent="WidthAndHeight"
+        CanResize="False"
+        ShowInTaskbar="False"
+        WindowStartupLocation="CenterOwner">
+
+    <Window.Styles>
+        <Style Selector="TextBlock#IconText.success">
+            <Setter Property="Foreground" Value="{DynamicResource MintAccentBrush}" />
+        </Style>
+    </Window.Styles>
+
+    <DockPanel>
+        <StackPanel Classes="dialogButtons" DockPanel.Dock="Bottom">
+            <Button Content="OK" Classes="accent" IsDefault="True" IsCancel="True" Click="Ok_Click" />
+        </StackPanel>
+
+        <Grid ColumnDefinitions="Auto,*" Margin="20,20,20,4" MinWidth="340" MaxWidth="560">
+            <TextBlock x:Name="IconText" FontFamily="{StaticResource MaterialDesignIcons}" FontSize="32"
+                       VerticalAlignment="Top" Margin="0,0,16,0" />
+            <StackPanel Grid.Column="1" Spacing="8">
+                <TextBlock x:Name="HeadingText" FontWeight="Bold" TextWrapping="Wrap" />
+                <!-- Selectable, so file paths and ffmpeg errors can be copied. -->
+                <SelectableTextBlock x:Name="MessageText" TextWrapping="Wrap" />
+            </StackPanel>
+        </Grid>
+    </DockPanel>
+</v:DialogWindow>

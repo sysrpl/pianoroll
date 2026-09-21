@@ -1,0 +1,31 @@
+# Build output
+docs/
+bin/
+obj/
+[Dd]ebug/
+[Rr]elease/
+publish/
+artifacts/
+*.nupkg
+
+# IDEs and editors
+.vs/
+.vscode/
+.idea/
+*.user
+*.suo
+*.userprefs
+*.swp
+*~
+
+# OS files
+.DS_Store
+Thumbs.db
+desktop.ini
+
+# Avalonia designer / test output
+*.log
+TestResults/
+
+# The app keeps its settings in the user's app data folder, not here; this guards against copies.
+settings.json

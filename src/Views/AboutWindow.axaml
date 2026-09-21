@@ -1,0 +1,53 @@
+<v:DialogWindow xmlns="https://github.com/avaloniaui"
+        xmlns:v="using:pianoroll.Views"
+        xmlns:x="http://schemas.microsoft.com/winfx/2006/xaml"
+        x:Class="pianoroll.Views.AboutWindow"
+        Title="About"
+        Icon="/images/icon.png"
+        SizeToContent="Height"
+        Width="520"
+        CanResize="False"
+        ShowInTaskbar="False"
+        WindowStartupLocation="CenterOwner">
+
+    <Window.Styles>
+        <Style Selector="Grid#DetailsGrid > TextBlock.name">
+            <Setter Property="Foreground" Value="{DynamicResource MintDimTextBrush}" />
+        </Style>
+    </Window.Styles>
+
+    <DockPanel>
+        <StackPanel Classes="dialogButtons" DockPanel.Dock="Bottom">
+            <Button Content="Copy build information" Click="CopyDetails_Click" />
+            <Button Content="Close" Classes="accent" IsDefault="True" IsCancel="True" Click="Close_Click" />
+        </StackPanel>
+
+        <StackPanel Margin="24,20,24,4" Spacing="12">
+            <Grid ColumnDefinitions="Auto,*">
+                <!-- The app icon -->
+                <Image Source="/images/icon.png" Width="48" Height="48"
+                       VerticalAlignment="Center" Margin="0,0,16,0" />
+                <StackPanel Grid.Column="1" VerticalAlignment="Center" Spacing="2">
+                    <TextBlock x:Name="NameText" FontSize="22" FontWeight="Bold" />
+                    <TextBlock x:Name="VersionText" Foreground="{DynamicResource MintDimTextBrush}" />
+                </StackPanel>
+            </Grid>
+
+            <TextBlock TextWrapping="Wrap"
+                       Text="A player piano: open a MIDI file and watch its notes fall onto the keyboard and play, or click the keys yourself." />
+            <TextBlock TextWrapping="Wrap"
+                       Text="Instruments are played from a General MIDI SoundFont when one is installed, and from the program's own synthesis when there isn't. Choose piano, organ, electric guitar or banjo from the toolbar or the Instrument menu." />
+
+            <TextBlock Text="Build information" FontWeight="Bold" Margin="0,6,0,0" />
+            <!-- A fixed height with a vertical scroll bar, so the build details don't make the window
+                 tall. Long lines (the operating system) wrap rather than scroll sideways. -->
+            <Border Background="{DynamicResource MintViewBrush}" CornerRadius="3">
+                <ScrollViewer x:Name="DetailsScroller" Height="96"
+                              HorizontalScrollBarVisibility="Disabled" VerticalScrollBarVisibility="Auto">
+                    <!-- Selectable, so it can be copied into a bug report. -->
+                    <Grid x:Name="DetailsGrid" ColumnDefinitions="Auto,*" Margin="10,8" />
+                </ScrollViewer>
+            </Border>
+        </StackPanel>
+    </DockPanel>
+</v:DialogWindow>
