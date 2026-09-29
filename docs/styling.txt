@@ -1,0 +1,24 @@
+UI styling rules
+================
+
+Font
+- The default font for UI elements is Ubuntu Regular, 10pt.
+
+Buttons
+- All buttons are 25px high and at least 75px wide.
+- Buttons are 8px from the window border and 8px apart from each other.
+
+Toolbar buttons
+- Toolbar buttons are 24px x 24px.
+- Toolbar buttons are 4px apart from each other.
+
+Middle transfer buttons (the < and > arrows and the lock between the panes)
+- These buttons are 32px x 32px.
+- They are 8px apart from each other and 8px from the sides.
+
+Menu separators
+- Separators (horizontal rules) in menus are subtle: 50% less visible (50% opacity).
+
+App icon
+- resources/icon.png is the program's icon in the taskbar, in menus such as the
+  Mint menu, and on the About screen.

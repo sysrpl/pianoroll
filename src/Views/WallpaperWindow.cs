@@ -56,15 +56,22 @@ public sealed class WallpaperWindow : Window
         WindowState = WindowState.FullScreen;
 
         // Once both windows exist, the player is marked as belonging in front of this one,
-        // and given the focus back.
+        // and given the focus back. It is also made always-on-top: Cinnamon only hides the
+        // panel over a full-screen window when no ordinary window is above it, and the player
+        // would otherwise count as one.
         Opened += (_, _) =>
         {
             X11Stacking.KeepInFront(_front, this);
+            _front.Topmost = true;
             Dispatcher.UIThread.Post(() => _front.Activate());
         };
 
         // The player must stand on its own again before this window goes.
-        Closing += (_, _) => X11Stacking.Release(_front);
+        Closing += (_, _) =>
+        {
+            _front.Topmost = false;
+            X11Stacking.Release(_front);
+        };
 
         // Never let the backdrop stay in front of the player.
         Activated += (_, _) => Dispatcher.UIThread.Post(() => _front.Activate());

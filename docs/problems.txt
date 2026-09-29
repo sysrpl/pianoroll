@@ -1,0 +1,36 @@
+F1 backdrop not covering the Cinnamon panel
+===========================================
+
+Problem
+
+With the F1 backdrop up, the Mint panel on the left still showed on top of it.
+
+Cause
+
+Muffin (Cinnamon's window manager, 6.6.3) has no full screen layer, so it never puts a
+full screen window above the panel. Instead, Cinnamon hides the panel whenever Muffin says the
+monitor is "in fullscreen", and Muffin decides that in check_fullscreen_func
+(src/core/display.c) by walking the windows from top to bottom:
+
+  * If it reaches a full screen window, the monitor counts as full screen and the panel hides.
+  * The exception: if it passes an ordinary window (type NORMAL, not always on top) larger than
+    100x100 first, the monitor counts as "obscured" and the panel stays.
+  * Always-on-top windows are skipped.
+
+The backdrop is full screen, but the player is an ordinary 1000x700 window stacked on top of
+it. Muffin met the player first, decided it covered the backdrop, and left the panel showing.
+The WM_TRANSIENT_FOR link set by X11Stacking keeps the player above the backdrop, but has no
+effect on this rule.
+
+Fix
+
+While the backdrop is up, the player is made always on top (Topmost = true, which sets
+_NET_WM_STATE_ABOVE), so Muffin skips it and hides the panel. Topmost is turned off again when
+the backdrop closes. See WallpaperWindow.cs.
+
+Marking the player as a dialog (_NET_WM_WINDOW_TYPE_DIALOG) would also have exempted it, but
+Muffin takes maximize and full screen away from any window that isn't NORMAL, which would break
+F11. Always-on-top keeps both.
+
+Why it worked before is unknown. By Muffin's rules the player should always have stopped the
+backdrop from covering the panel.

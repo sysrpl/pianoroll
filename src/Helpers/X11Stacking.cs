@@ -7,11 +7,9 @@ namespace pianoroll.Helpers;
 /// Tells an X11 window manager that one window belongs in front of another, without Avalonia's
 /// window ownership (which would close the player along with the backdrop).
 ///
-/// This is what lets the F1 backdrop cover the desktop panel. A panel sits above ordinary
-/// windows; only a full-screen window goes above it, and window managers keep a full-screen
-/// window up there only while it — or a window transient for it, like a dialog — has the focus.
-/// Marking the player transient for the backdrop keeps the backdrop over the panel and the
-/// player over the backdrop, the way a dialog sits over a full-screen game.
+/// This keeps the player over the F1 backdrop, the way a dialog sits over a full-screen game.
+/// (Covering the panel is a separate matter: Cinnamon hides it while a full-screen window has
+/// no ordinary window above it, so the backdrop also makes the player always-on-top.)
 ///
 /// Anywhere but X11 these do nothing.
 /// </summary>
